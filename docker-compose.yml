@@ -14,7 +14,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   api:
-    build: ./app
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: recommender_api
     command: >
       sh -c "python manage.py migrate &&
