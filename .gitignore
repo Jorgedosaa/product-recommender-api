@@ -1,0 +1,47 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.so
+
+# --- Entorno virtual ---
+venv/
+env/
+.venv/
+
+# --- Archivos de configuración locales ---
+*.env
+.env.*
+!.env.example
+
+# --- Django ---
+*.log
+db.sqlite3
+media/
+staticfiles/
+static/
+
+# --- VSCode ---
+.vscode/
+
+# --- PyCharm ---
+.idea/
+
+# --- Docker ---
+# Evitar subir volúmenes o archivos generados
+docker-data/
+*.pid
+
+# --- Byte-compiled / cache ---
+*.egg-info/
+.eggs/
+*.egg
+dist/
+build/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
