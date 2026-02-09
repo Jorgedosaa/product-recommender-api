@@ -3,38 +3,41 @@ from django.core.management.base import BaseCommand
 from products.models import Product
 from sentence_transformers import SentenceTransformer
 
+
 class Command(BaseCommand):
-    help = 'Genera vectores (embeddings) para los productos usando SentenceTransformers'
+    help = "Generates vectors (embeddings) for products using SentenceTransformers"
 
     def handle(self, *args, **options):
-        self.stdout.write("Iniciando Fase 2: Generación de Embeddings...")
-        
-        # Cargamos el modelo (se descarga automáticamente la primera vez)
-        # Usamos el modelo ligero MiniLM-L6 (384 dimensiones)
-        self.stdout.write("Cargando modelo all-MiniLM-L6-v2 en CPU...")
-        model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
+        self.stdout.write("Starting Phase 2: Embedding Generation...")
 
-        # Buscamos productos que tengan texto pero les falte el vector
+        # Load the model (downloaded automatically the first time)
+        # We use the lightweight MiniLM-L6 model (384 dimensions)
+        self.stdout.write("Loading model all-MiniLM-L6-v2 on CPU...")
+        model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+
+        # Find products that have text but are missing the vector
         products = Product.objects.filter(embedding__isnull=True)
         count = products.count()
 
         if count == 0:
-            self.stdout.write(self.style.SUCCESS("No hay productos nuevos para procesar."))
+            self.stdout.write(self.style.SUCCESS("No new products to process."))
             return
 
-        self.stdout.write(f"Procesando {count} productos...")
+        self.stdout.write(f"Processing {count} products...")
 
         for p in products:
-            # Combinamos título y descripción para mejor contexto semántico
+            # Combine title and description for better semantic context
             text_data = f"{p.title} {p.description}"
-            
-            # Generar el embedding (vector numérico)
+
+            # Generate the embedding (numeric vector)
             embedding_vector = model.encode(text_data)
-            
-            # Guardar en la base de datos (convertido a lista para pgvector)
+
+            # Save to the database (converted to list for pgvector)
             p.embedding = embedding_vector.tolist()
             p.save()
-            
-            self.stdout.write(f"✓ Vector generado para ASIN: {p.asin}")
 
-        self.stdout.write(self.style.SUCCESS(f"¡Proceso terminado! {count} embeddings creados."))
+            self.stdout.write(f"✓ Vector generated for ASIN: {p.asin}")
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Process finished! {count} embeddings created.")
+        )

@@ -4,7 +4,7 @@ djangorestframework
 psycopg2-binary
 pgvector
 
-# Librerías de IA (forzamos versión CPU desde el índice de PyTorch)
+# AI Libraries (force CPU version from PyTorch index)
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch
 transformers
