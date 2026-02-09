@@ -1,12 +1,11 @@
---index-url https://download.pytorch.org/whl/cpu
 
-# Core del proyecto
 Django
 djangorestframework
 psycopg2-binary
 pgvector
 
-# IA y Embeddings
+# Librerías de IA (forzamos versión CPU desde el índice de PyTorch)
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch
 transformers
 sentence-transformers
