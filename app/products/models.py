@@ -1,6 +1,6 @@
 from django.db import models
-
-from django.db import models
+# Importación necesaria para manejar vectores en PostgreSQL
+from pgvector.django import VectorField
 
 class Product(models.Model):
     asin = models.CharField(max_length=20, unique=True)
@@ -10,11 +10,10 @@ class Product(models.Model):
     brand = models.CharField(max_length=255, blank=True)
     price = models.FloatField(null=True, blank=True)
 
-    # Embedding se añadirá en Fase 2
-    # embedding = VectorField(dimensions=384)
+    # Ahora Django reconocerá VectorField
+    embedding = VectorField(dimensions=384, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
-
