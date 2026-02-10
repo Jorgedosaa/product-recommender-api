@@ -1,32 +1,29 @@
 from rest_framework import generics
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 from pgvector.django import CosineDistance
+from sentence_transformers import SentenceTransformer
 from .models import Product
 from .serializers import ProductSerializer
 
-class ProductListCreateView(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+# Initialize model outside the view for better performance (cached in memory)
+# Using CPU-only as per requirements
+model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
 
-class ProductRecommendationView(generics.ListAPIView):
+class ProductSemanticSearchView(generics.ListAPIView):
     """
-    API View to retrieve similar products based on vector embeddings.
+    Search products using natural language queries.
     """
     serializer_class = ProductSerializer
 
     def get_queryset(self):
-        product_id = self.kwargs.get('pk')
-        # Fetch the reference product
-        target_product = get_object_or_404(Product, pk=product_id)
-        
-        # Ensure the product has an embedding before calculating distance
-        if target_product.embedding is None:
+        query = self.request.query_params.get('q', None)
+        if not query:
             return Product.objects.none()
 
-        # Query similar products excluding the target itself
-        # Using the <=> operator via CosineDistance
-        return Product.objects.exclude(id=product_id).annotate(
-            distance=CosineDistance('embedding', target_product.embedding)
-        ).order_by('distance')[:5]
+        # Phase 4: Convert user text query into a vector embedding
+        query_embedding = model.encode(query).tolist()
 
+        # Perform similarity search against all products
+        return Product.objects.annotate(
+            distance=CosineDistance('embedding', query_embedding)
+        ).order_by('distance')[:5]
