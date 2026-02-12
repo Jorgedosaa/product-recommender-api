@@ -6,14 +6,24 @@ from .views import (
     ProductSemanticSearchView,
 )
 
+# Using descriptive app_name for reverse URL lookups in your portfolio
+app_name = "products"
+
 urlpatterns = [
-    path("", ProductListCreateView.as_view(), name="product-list"),
+    # Basic CRUD: List all products or create one
+    path("", ProductListCreateView.as_view(), name="product_list"),
+    
+    # Phase 3 & 4: Recommendations based on Vector Similarity (Cosine Distance)
     path(
-        "<int:pk>/similar/",
+        "<int:pk>/recommendations/",
         ProductRecommendationView.as_view(),
-        name="product-recommendations",
+        name="product_recommendations",
     ),
+    
+    # Phase 4: Semantic Search using Natural Language Processing
     path(
-        "search/", ProductSemanticSearchView.as_view(), name="product-semantic-search"
+        "search/", 
+        ProductSemanticSearchView.as_view(), 
+        name="product_semantic_search"
     ),
 ]
