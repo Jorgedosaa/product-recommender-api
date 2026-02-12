@@ -1,6 +1,14 @@
+# --- Framework & API ---
 Django>=5.0.2
 djangorestframework
-pgvector
-sentence-transformers
 python-dotenv
+
+# --- Database ---
 psycopg2-binary
+pgvector
+
+# --- Machine Learning (CPU Optimized) ---
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+transformers
+sentence-transformers
