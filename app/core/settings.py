@@ -127,3 +127,4 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 ALLOWED_HOSTS = ['192.168.1.77', 'localhost', '127.0.0.1']
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
