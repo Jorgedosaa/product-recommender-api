@@ -1,20 +1,21 @@
 import logging
-from typing import List
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Case, When, Value, BooleanField
 from django.shortcuts import get_object_or_404
 from pgvector.django import CosineDistance
 from rest_framework import generics
-from rest_framework.request import Request
+from rest_framework.response import Response
 from sentence_transformers import SentenceTransformer
 
 from .models import Product
 from .serializers import ProductSerializer
 
-# Set up logging for easier debugging in the server
+# Set up logging for production-ready debugging
 logger = logging.getLogger(__name__)
 
+# Constants for AI Logic
+SIMILARITY_THRESHOLD = 0.7  # Distances > 0.7 are considered low confidence
+
 # Initialize model outside the view for better performance (cached in memory)
-# Using CPU device explicitly as per requirements optimization
 try:
     model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
     logger.info("SentenceTransformer model loaded successfully on CPU.")
@@ -40,13 +41,10 @@ class ProductRecommendationView(generics.ListAPIView):
         product_id = self.kwargs.get("pk")
         target_product = get_object_or_404(Product, pk=product_id)
 
-        # Safety check: Ensure the product has an embedding processed
         if target_product.embedding is None:
             logger.warning(f"Product ID {product_id} has no embedding.")
             return Product.objects.none()
 
-        # Search for similar items excluding the reference product itself
-        # Annotate with distance to allow frontend to display similarity score if needed
         return (
             Product.objects.exclude(id=product_id)
             .annotate(distance=CosineDistance("embedding", target_product.embedding))
@@ -57,7 +55,7 @@ class ProductRecommendationView(generics.ListAPIView):
 class ProductSemanticSearchView(generics.ListAPIView):
     """
     Phase 4: Enables natural language search using vector embeddings.
-    Converts search queries into vectors in real-time.
+    Includes a quality filter to identify high-confidence matches.
     """
     serializer_class = ProductSerializer
 
@@ -67,13 +65,37 @@ class ProductSemanticSearchView(generics.ListAPIView):
             return Product.objects.none()
 
         try:
-            # Convert text query into a vector (list)
+            # Convert text query into a vector in real-time
             query_embedding = model.encode(query).tolist()
 
-            # Return top 5 matches based on semantic similarity
+            # Annotate each result with a boolean 'is_high_confidence'
             return Product.objects.annotate(
                 distance=CosineDistance("embedding", query_embedding)
+            ).annotate(
+                is_high_confidence=Case(
+                    When(distance__lt=SIMILARITY_THRESHOLD, then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                )
             ).order_by("distance")[:5]
         except Exception as e:
             logger.error(f"Search error: {e}")
             return Product.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Custom response format to provide metadata about match quality.
+        This allows the frontend to show "closest alternatives" warnings.
+        """
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        
+        # Determine if we have any high-confidence matches in the result set
+        has_exact_matches = any(
+            item.get('is_high_confidence', False) for item in serializer.data
+        )
+        
+        return Response({
+            "has_exact_matches": has_exact_matches,
+            "results": serializer.data
+        })
