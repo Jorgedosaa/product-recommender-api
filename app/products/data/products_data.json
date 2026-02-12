@@ -1,0 +1,17 @@
+[
+  {"asin": "B08J5F3G58", "title": "Logitech G Pro X Superlight", "description": "Ultra-lightweight wireless gaming mouse, 25K sensor, 63g weight, black.", "category": "Gaming", "brand": "Logitech", "price": 149.99},
+  {"asin": "B098RKP9TV", "title": "Keychron K2 Mechanical Keyboard", "description": "Wireless mechanical keyboard, 75% layout, RGB backlight, Gateron switches, Aluminum frame.", "category": "Electronics", "brand": "Keychron", "price": 99.00},
+  {"asin": "B08N5WRWJ5", "title": "Samsung Odyssey G7 Monitor", "description": "32-inch curved gaming monitor, 240Hz, 1ms, QLED, WQHD resolution, G-Sync compatible.", "category": "Electronics", "brand": "Samsung", "price": 699.99},
+  {"asin": "B09H26FCFQ", "title": "Bose QuietComfort 45", "description": "Wireless noise cancelling headphones, over-ear, high-fidelity audio, white.", "category": "Audio", "brand": "Bose", "price": 329.00},
+  {"asin": "B08GD5X4W1", "title": "Razer BlackWidow V3", "description": "Mechanical gaming keyboard, Green switches, tactile and clicky, Chroma RGB lighting.", "category": "Gaming", "brand": "Razer", "price": 139.99},
+  {"asin": "B09G96TFF7", "title": "Apple iPad Pro M1", "description": "11-inch tablet, Liquid Retina display, 128GB, WiFi, M1 chip for high performance.", "category": "Tablets", "brand": "Apple", "price": 799.00},
+  {"asin": "B08ZS7CHBS", "title": "Dell UltraSharp U2723QE", "description": "27-inch 4K USB-C Hub monitor, IPS Black technology, 100% sRGB, productivity focused.", "category": "Electronics", "brand": "Dell", "price": 580.00},
+  {"asin": "B0798CWWP9", "title": "Audio-Technica ATH-M50xBT2", "description": "Professional studio monitor wireless headphones, exceptional clarity, deep bass.", "category": "Audio", "brand": "Audio-Technica", "price": 199.00},
+  {"asin": "B08N5M7S6K", "title": "SteelSeries Apex Pro", "description": "Mechanical gaming keyboard, adjustable actuation switches, OLED smart display.", "category": "Gaming", "brand": "SteelSeries", "price": 199.99},
+  {"asin": "B09V1S64S2", "title": "MacBook Air M2", "description": "13.6-inch laptop, M2 chip, 8GB RAM, 256GB SSD, Midnight color, silent fanless design.", "category": "Computers", "brand": "Apple", "price": 1099.00},
+  {"asin": "B091J3NYVF", "title": "LG C1 OLED TV", "description": "48-inch 4K Smart TV, 120Hz, HDMI 2.1, perfect for gaming and movies.", "category": "Electronics", "brand": "LG", "price": 899.00},
+  {"asin": "B08KY2SC7F", "title": "Sony ZV-1 Vlogging Camera", "description": "Compact camera for creators, flip screen, built-in microphone, fast autofocus.", "category": "Cameras", "brand": "Sony", "price": 748.00},
+  {"asin": "B0B9TJZ6BK", "title": "HyperX SoloCast", "description": "USB condenser gaming microphone, tap-to-mute sensor, cardioid polar pattern.", "category": "Audio", "brand": "HyperX", "price": 59.99},
+  {"asin": "B07WJJL8C5", "title": "Blue Yeti USB Microphone", "description": "Classic professional multi-pattern USB microphone for recording and streaming.", "category": "Audio", "brand": "Blue", "price": 129.00},
+  {"asin": "B08K997F96", "title": "ASUS ROG Swift PG259QN", "description": "24.5-inch 360Hz gaming monitor, 1ms, HDR10, G-Sync, professional esports display.", "category": "Gaming", "brand": "ASUS", "price": 499.00}
+]
