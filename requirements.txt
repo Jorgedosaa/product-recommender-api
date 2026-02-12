@@ -2,6 +2,7 @@
 Django>=5.0.2
 djangorestframework
 python-dotenv
+django-cors-headers
 
 # --- Database ---
 psycopg2-binary
