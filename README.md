@@ -11,6 +11,7 @@ A production-ready REST API built with Django and Django REST Framework that pro
 
 - **Full CRUD Operations**: Manage products with standard RESTful endpoints.
 - **AI-Powered Recommendations**: Finds similar products based on vector embeddings (Cosine Similarity).
+- ![Build Status](https://github.com/Jorgedosaa/product-recommender-api/actions/workflows/tests.yml/badge.svg)
 - **Semantic Search**: Search for products using natural language queries, not just keyword matching.
 - **Hybrid Filtering**: Recommendations are refined by category and price range for better relevance.
 - **Performance**: Optimized database queries and vector indexing.
