@@ -7,12 +7,11 @@ __pycache__/
 *.pkl
 *.so
 
-# --- Entorno virtual ---
 venv/
 env/
 .venv/
 
-# --- Archivos de configuración locales ---
+# --- Local Configuration Files ---
 *.env
 .env.*
 !.env.example
@@ -31,7 +30,7 @@ static/
 .idea/
 
 # --- Docker ---
-# Evitar subir volúmenes o archivos generados
+# Avoid uploading volumes or generated files
 docker-data/
 *.pid
 

@@ -1,86 +1,90 @@
-# AI-Powered Product Recommender API 🚀
+# Product Recommender API
 
-**A High-Performance Semantic Search Engine & Recommendation System**
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![Django](https://img.shields.io/badge/django-5.0-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-A professional-grade API built with **Django REST Framework** and **PostgreSQL (pgvector)** that leverages Machine Learning to understand user intent beyond simple keyword matching.
+A production-ready REST API built with Django and Django REST Framework that provides intelligent product recommendations using Vector Similarity Search (pgvector) and Semantic Search (Sentence Transformers).
 
----
+## 🚀 Features
 
-## 🌟 Key Features
+- **Full CRUD Operations**: Manage products with standard RESTful endpoints.
+- **AI-Powered Recommendations**: Finds similar products based on vector embeddings (Cosine Similarity).
+- **Semantic Search**: Search for products using natural language queries, not just keyword matching.
+- **Hybrid Filtering**: Recommendations are refined by category and price range for better relevance.
+- **Performance**: Optimized database queries and vector indexing.
 
-- **🧠 Semantic Vector Search**: Utilizes `sentence-transformers` to convert natural language queries into vector embeddings, enabling the system to "understand" context (e.g., finding "ergonomic seating" when searching for "office chair").
-- **⚡ CPU-Optimized ML Inference**: The AI pipeline is strictly optimized for CPU environments using the `all-MiniLM-L6-v2` model, ensuring low latency without requiring expensive GPUs.
-- **🎯 Smart Match Quality**: Implements a **Quality Filter** (threshold `0.7`) to programmatically distinguish between high-confidence exact matches and "closest alternative" suggestions.
-- **🔍 Real-Time Recommendations**: Calculates **Cosine Distance** directly within the database layer for efficient similarity ranking.
+## 🛠 Tech Stack
 
-## 🏗️ Technical Architecture
+- **Backend**: Python 3.12, Django 5, Django REST Framework
+- **Database**: PostgreSQL with `pgvector` extension
+- **AI/ML**: `sentence-transformers` (all-MiniLM-L6-v2)
+- **Testing**: Pytest / Django APITestCase
 
-| Component | Technology |
-|-----------|------------|
-| **Backend** | Django REST Framework (Python 3.10) |
-| **Database** | PostgreSQL + `pgvector` extension |
-| **AI/ML** | HuggingFace Transformers, PyTorch (CPU build) |
-| **Infrastructure** | Docker & Docker Compose |
-| **Frontend** | Vanilla JS + Tailwind CSS |
+## 📦 Installation
 
-## ⚙️ How It Works
-
-1. **Vector Embeddings**: When a product is imported, its description is passed through a Transformer model to generate a 384-dimensional vector representation.
-2. **Semantic Querying**: When a user searches, their text input is converted into a vector in real-time.
-3. **Cosine Similarity**: The database calculates the angular distance between the query vector and stored product vectors.
-   - **Closer to 0**: Higher similarity.
-   - **Closer to 1**: Lower similarity.
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Docker & Docker Compose installed.
-
-### 1. Clone & Build
-```bash
-git clone https://github.com/Jorgedosaa/product-recommender-api.git
-cd product-recommender-api
-docker compose up -d --build
-```
-
-### 2. Initialize Database & Data
-Run the custom management commands to populate the database and generate vector embeddings:
-
-```bash
-# Apply database migrations
-docker compose exec api python manage.py migrate
-
-# Import sample dataset (Amazon Products)
-docker compose exec api python manage.py import_amazon_data
-
-# Generate vector embeddings for semantic search
-docker compose exec api python manage.py generate_embeddings
-```
-
-### 3. Access the Application
-- **Frontend UI**: Open `http://localhost:8000` in your browser.
-- **API Endpoint**: `http://localhost:8000/products/search/?q=laptop`
-
-## 💡 Technical Challenges Solved
-
-### 1. CPU-Only Inference Optimization
-Deploying ML models often requires heavy GPU resources. I optimized the build process by explicitly targeting the CPU-only wheels for PyTorch (`--extra-index-url https://download.pytorch.org/whl/cpu`), significantly reducing the Docker image size and runtime resource consumption.
-
-### 2. Handling Non-Exact Matches
-A common issue in vector search is returning results even when they are irrelevant. I implemented a **dynamic thresholding logic** in the view layer:
-- Calculates distance scores.
-- Flags results as `is_high_confidence` if the distance is `< 0.7`.
-- Allows the frontend to warn users if results are merely "best guesses" rather than exact matches.
-
-### 3. CORS & Frontend Integration
-To enable a seamless decoupled architecture between the static frontend and the API, I configured `django-cors-headers` to handle Cross-Origin Resource Sharing securely, allowing the Vanilla JS client to consume the API directly.
-
-
-
-## 🛠️ Quick Start (Server Setup)
-
-1. **Clone and Run:**
+1. **Clone the repository**
    ```bash
-   git clone [https://github.com/Jorgedosaa/product-recommender-api.git](https://github.com/Jorgedosaa/product-recommender-api.git)
+   git clone https://github.com/yourusername/product-recommender-api.git
    cd product-recommender-api
-   docker compose up -d --build
+   ```
+
+2. **Set up virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Database Setup**
+   Ensure you have PostgreSQL installed and the `pgvector` extension enabled.
+   ```sql
+   CREATE EXTENSION vector;
+   ```
+   Then run migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+5. **Run the server**
+   ```bash
+   python manage.py runserver
+   ```
+
+## 🧪 Running Tests
+
+This project uses a comprehensive test suite covering CRUD, edge cases, and AI logic.
+
+```bash
+python manage.py test products
+```
+
+## 📡 API Endpoints
+
+For detailed documentation, including request/response examples, see [API_DOCS.md](API_DOCS.md).
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products/` | List all products |
+| POST | `/api/products/` | Create a new product |
+| GET | `/api/products/{id}/` | Retrieve product details |
+| PATCH | `/api/products/{id}/` | Update a product |
+| DELETE | `/api/products/{id}/` | Delete a product |
+| GET | `/api/products/{id}/recommendations/` | Get AI-based recommendations |
+| GET | `/api/products/search/?q={query}` | Semantic search |
+
+## 🧠 Recommendation Algorithm
+
+The recommendation engine uses a hybrid approach:
+1. **Filtering**: Candidates are filtered by the target product's **Category** and a **Price Range** (+/- 50%).
+2. **Vector Search**: Calculates Cosine Distance between the target product's embedding and candidates.
+3. **Ranking**: Returns the top 5 closest matches.
+
+## 📂 Project Structure
+
+The project follows a standard Django app structure, with logic separated into `serializers`, `views`, and `models`. Tests are located in `products/tests.py`.
