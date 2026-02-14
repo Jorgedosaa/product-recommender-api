@@ -17,9 +17,9 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg16
         env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
+          POSTGRES_DB: recommender
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
@@ -43,6 +43,10 @@ jobs:
     
     - name: Run Tests
       env:
-        DATABASE_URL: postgres://user:password@localhost:5432/test_db
+        DB_HOST: localhost
+        DB_NAME: recommender
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        DEBUG: "False"
       run: |
         python manage.py test products
