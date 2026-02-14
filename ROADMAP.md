@@ -16,7 +16,7 @@
 - [x] Detailed API Documentation
 
 ## Phase 4: Future Improvements
-- [ ] **Dockerization**: Create Dockerfile and docker-compose for easy deployment.
+- [x] **Dockerization**: Create Dockerfile and docker-compose for easy deployment.
 - [ ] **Async Tasks**: Move embedding generation to Celery tasks to improve write performance.
 - [ ] **Pagination**: Add standard DRF pagination to list and search endpoints.
 - [ ] **Authentication**: Add JWT authentication for secure access.

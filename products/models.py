@@ -1,7 +1,7 @@
 from django.db import models
 
 # Import necessary to handle vectors in PostgreSQL
-from pgvector.django import VectorField
+from pgvector.django import HnswIndex, VectorField
 
 
 class Product(models.Model):
@@ -19,3 +19,15 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        # Add HNSW index for faster vector similarity search
+        indexes = [
+            HnswIndex(
+                name="product_embedding_hnsw_idx",
+                fields=["embedding"],
+                m=16,
+                ef_construction=64,
+                opclasses=["vector_cosine_ops"],
+            )
+        ]

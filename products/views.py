@@ -2,9 +2,13 @@ import logging
 
 from django.db.models import BooleanField, Case, QuerySet, Value, When
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from pgvector.django import CosineDistance
-from rest_framework import generics
+from rest_framework import filters, generics, permissions
+from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from sentence_transformers import SentenceTransformer
 
 from .models import Product
@@ -24,6 +28,12 @@ except Exception as e:
     logger.error(f"Error loading SentenceTransformer: {e}")
 
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
 class ProductListCreateView(generics.ListCreateAPIView):
     """
     Standard view to list all products or create new ones.
@@ -31,6 +41,22 @@ class ProductListCreateView(generics.ListCreateAPIView):
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    pagination_class = StandardResultsSetPagination
+    # Protect write operations, allow read-only for public
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    # Add standard filtering, searching, and ordering
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ["category"]  # Enable ?category=Electronics
+    search_fields = [
+        "title",
+        "description",
+    ]  # Enable ?search=keyword (Standard DB search)
+    ordering_fields = ["price", "created_at"]  # Enable ?ordering=price
 
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -40,6 +66,8 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    # Protect write operations, allow read-only for public
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ProductRecommendationView(generics.ListAPIView):
@@ -49,6 +77,8 @@ class ProductRecommendationView(generics.ListAPIView):
     """
 
     serializer_class = ProductSerializer
+    permission_classes = [permissions.AllowAny]  # Public endpoint
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]  # Prevent abuse
 
     def get_queryset(self) -> QuerySet:
         product_id = self.kwargs.get("pk")
@@ -83,11 +113,17 @@ class ProductSemanticSearchView(generics.ListAPIView):
     """
 
     serializer_class = ProductSerializer
+    permission_classes = [permissions.AllowAny]  # Public endpoint
+    pagination_class = (
+        StandardResultsSetPagination  # Enable pagination for search results
+    )
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]  # Prevent abuse
 
     def get_queryset(self) -> QuerySet:
         query = self.request.query_params.get("q", None)
         if not query:
-            return Product.objects.none()
+            # Return 400 if 'q' is missing, as it's required for this endpoint
+            raise ValidationError({"q": "This query parameter is required."})
 
         try:
             # Convert text query into a vector in real-time
@@ -105,7 +141,7 @@ class ProductSemanticSearchView(generics.ListAPIView):
                         output_field=BooleanField(),
                     )
                 )
-                .order_by("distance")[:5]
+                .order_by("distance")
             )
         except Exception as e:
             logger.error(f"Search error: {e}")
@@ -117,13 +153,22 @@ class ProductSemanticSearchView(generics.ListAPIView):
         This allows the frontend to show "closest alternatives" warnings.
         """
         queryset = self.get_queryset()
+
+        # Apply pagination to the semantic search results
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+
+            # Determine if we have any high-confidence matches in the current page
+            has_exact_matches = any(
+                item.get("is_high_confidence", False) for item in serializer.data
+            )
+
+            # Return standard paginated response but inject our custom metadata
+            response = self.get_paginated_response(serializer.data)
+            response.data["has_exact_matches"] = has_exact_matches
+            return response
+
+        # Fallback if pagination is disabled
         serializer = self.get_serializer(queryset, many=True)
-
-        # Determine if we have any high-confidence matches in the result set
-        has_exact_matches = any(
-            item.get("is_high_confidence", False) for item in serializer.data
-        )
-
-        return Response(
-            {"has_exact_matches": has_exact_matches, "results": serializer.data}
-        )
+        return Response(serializer.data)
