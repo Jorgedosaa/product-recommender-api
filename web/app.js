@@ -1,20 +1,16 @@
 // --- Configuration ---
-// Determine the API URL based on where this file is running.
-// This fixes the issue when running from a local file (file://) or localhost.
 let API_URL;
 
+// Detects whether we are on a local file or on a server
 if (window.location.protocol === 'file:' || window.location.hostname === '') {
-    // Case 1: Running as a local file system (file://)
     API_URL = 'http://localhost:8000/products/search/';
 } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    // Case 2: Running on a local web server
     API_URL = 'http://localhost:8000/products/search/';
 } else {
-    // Case 3: Running on a network or production server
     API_URL = `http://${window.location.hostname}:8000/products/search/`;
 }
 
-console.log("API Target URL:", API_URL); // Debugging: Check console to see the active URL
+console.log("API Target URL:", API_URL); 
 
 // --- Logic ---
 document.getElementById('searchInput').addEventListener('keypress', (e) => {
@@ -32,17 +28,13 @@ async function searchProducts() {
     loadingIndicator.classList.remove('hidden');
 
     try {
-        // Fetch data from the API
         const response = await fetch(`${API_URL}?q=${encodeURIComponent(query)}`);
         
         if (!response.ok) throw new Error('Network response was not ok');
         
         const data = await response.json();
-        
-        // Handle Django Pagination:
-        // The API returns { results: [...], count: ... } for paginated views.
-        // We check if 'results' exists, otherwise we assume it's a flat array.
-        const products = data.results || data;
+        // Support Django pagination structure or flat list
+        const products = data.results || data; 
 
         loadingIndicator.classList.add('hidden');
 
@@ -65,13 +57,11 @@ async function searchProducts() {
             <div class="text-red-500 text-center col-span-full">
                 Error connecting to the API. <br>
                 <small class="text-gray-400">Target URL: ${API_URL}</small>
-                <br><small class="text-gray-400">Check console for details.</small>
             </div>`;
     }
 }
 
 function createProductCard(product) {
-    // Calculate similarity percentage if available
     const similarity = product.distance !== undefined 
         ? Math.max(0, (1 - product.distance) * 100).toFixed(1) 
         : null;
