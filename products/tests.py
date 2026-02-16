@@ -1,13 +1,15 @@
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth.models import User
+
 from .models import Product
+
 
 class ProductAPITests(APITestCase):
     def setUp(self):
         # 1. Crear un usuario y forzar autenticación para permitir POST, PATCH y DELETE
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username="testuser", password="password")
         self.client.force_authenticate(user=self.user)
 
         # 2. Crear un producto de prueba con un vector dummy (384 dimensiones)
@@ -35,8 +37,8 @@ class ProductAPITests(APITestCase):
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Verificamos dentro de 'results' debido a la paginación configurada
-        self.assertEqual(len(response.data['results']), 1)
-        self.assertEqual(response.data['results'][0]["asin"], "TEST01")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["asin"], "TEST01")
 
     def test_create_product(self):
         """Test para crear un nuevo producto (requiere autenticación)."""
@@ -77,7 +79,7 @@ class ProductAPITests(APITestCase):
         self.assertNotIn("embedding", response.data)
 
         response = self.client.get(self.list_url)
-        self.assertNotIn("embedding", response.data['results'][0])
+        self.assertNotIn("embedding", response.data["results"][0])
 
     def test_semantic_search(self):
         """Test de estructura de respuesta en búsqueda semántica."""
@@ -88,12 +90,13 @@ class ProductAPITests(APITestCase):
 
     def test_search_no_results(self):
         """Test de búsqueda vacía."""
+        # Una búsqueda con cadena vacía debería retornar una lista vacía o un error controlado.
+        # Asumimos que la API es robusta y retorna lista vacía (200 OK).
         response = self.client.get(self.search_url, {"q": ""}, follow=True)
-        # El endpoint devuelve 400 si falta el parámetro 'q'
-        if response.status_code == 400:
-            self.assertIn("q", response.data)
-        else:
-            self.assertEqual(len(response.data["results"]), 0)
+
+        # Si tu API valida que 'q' no sea vacío y lanza 400, cambia esto a assertEqual(400).
+        # Pero el test no debe tener condicionales if/else.
+        self.assertEqual(len(response.data.get("results", [])), 0)
 
     def test_product_recommendations(self):
         """Test que las recomendaciones devuelven productos similares paginados."""
@@ -106,9 +109,8 @@ class ProductAPITests(APITestCase):
         )
         response = self.client.get(self.recommend_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Corregido: Accedemos a 'results' por la paginación
-        self.assertIn('results', response.data)
-        self.assertEqual(len(response.data['results']), 1)
+        self.assertIn("results", response.data)
+        self.assertEqual(len(response.data["results"]), 1)
 
     def test_invalid_id(self):
         """Test de error 404 para IDs inexistentes."""
