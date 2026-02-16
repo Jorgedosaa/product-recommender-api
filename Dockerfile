@@ -24,4 +24,4 @@ EXPOSE 8000
 
 # Use Gunicorn for production instead of runserver
 # Ensure 'gunicorn' is in your requirements.txt
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "product_recommender_api.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "core.wsgi:application"]

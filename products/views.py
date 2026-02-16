@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from pgvector.django import CosineDistance
 from rest_framework import filters, generics, permissions
-from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
@@ -122,8 +121,8 @@ class ProductSemanticSearchView(generics.ListAPIView):
     def get_queryset(self) -> QuerySet:
         query = self.request.query_params.get("q", None)
         if not query:
-            # Return 400 if 'q' is missing, as it's required for this endpoint
-            raise ValidationError({"q": "This query parameter is required."})
+            # If 'q' is empty, return an empty queryset (tests expect 200 with empty results)
+            return Product.objects.none()
 
         try:
             # Convert text query into a vector in real-time
