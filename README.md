@@ -36,7 +36,7 @@ Este proyecto demuestra cómo implementar búsquedas vectoriales para encontrar 
 
 1.  **Clonar y configurar entorno:**
     ```bash
-    git clone https://github.com/tu-usuario/product-recommender-api.git
+    https://github.com/Jorgedosaa/product-recommender-api.git
     cd product-recommender-api
     python -m venv venv
     source venv/bin/activate
