@@ -32,6 +32,8 @@ The system is built as a set of microservices orchestrated via Docker Compose (L
 3.  **Queue (Redis):** Manages background tasks.
 4.  **Worker (Celery):** Processes embedding generation asynchronously to keep the API fast.
 
+
+
 ---
 
 ## 🛠 Tech Stack
@@ -90,13 +92,11 @@ This project is deployed on **Railway**.
 
 ## 🧪 Testing
 
-Run the comprehensive test suite (Unit + Integration tests):
+Run the comprehensive test suite. Si corres las pruebas localmente fuera de Docker, asegúrate de tener Redis disponible o activar el modo síncrono de Celery:
 
 ```bash
-python manage.py test products
+# Usando Docker 
+docker-compose exec api python manage.py test products
 
----
-
-## 📄 Documentation
-
-For detailed information about the API endpoints, request formats, and responses, please check the [API Documentation](API_DOCS.md).
+# Localmente (Host)
+DB_HOST=localhost CELERY_TASK_ALWAYS_EAGER=True python manage.py test products
