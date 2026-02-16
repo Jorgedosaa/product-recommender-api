@@ -1,102 +1,69 @@
-# 🛒 AI Product Recommender API
+# 🛍️ AI Product Recommender API
 
-![Build Status](https://github.com/Jorgedosaa/product-recommender-api/actions/workflows/tests.yml/badge.svg)
-![Python](https://img.shields.io/badge/python-3.12-blue)
-![Django](https://img.shields.io/badge/django-5.0-green)
-![Postgres](https://img.shields.io/badge/postgres-pgvector-blue)
-![Deployment](https://img.shields.io/badge/deploy-railway-purple)
-![License](https://img.shields.io/badge/license-MIT-blue)
+API RESTful de recomendación de productos y búsqueda semántica construida con **Django REST Framework**, **PostgreSQL (pgvector)** y modelos de **Machine Learning**.
 
-A production-ready REST API built with Django and Django REST Framework that provides intelligent product recommendations using **Vector Similarity Search (pgvector)** and **Semantic Search (Sentence Transformers)**.
+Este proyecto demuestra cómo implementar búsquedas vectoriales para encontrar productos por "significado" y no solo por coincidencia de palabras clave, además de generar recomendaciones de productos similares automáticamente.
 
-Live Demo: [https://product-recommender-api-production.up.railway.app/products/search/?q=laptop](https://product-recommender-api-production.up.railway.app/products/search/?q=laptop)
+## 🚀 Tecnologías
 
----
+*   **Backend:** Python 3.12, Django 5, Django REST Framework.
+*   **Base de Datos:** PostgreSQL 16 con extensión `pgvector`.
+*   **AI/ML:** `sentence-transformers` (HuggingFace) para generación de embeddings.
+*   **Async:** Celery & Redis para tareas en segundo plano.
+*   **CI/CD:** GitHub Actions.
 
-## 🚀 Features
+## ✨ Funcionalidades Clave
 
-- **🧠 Vector Similarity Search:** Uses `pgvector` to find products based on semantic meaning, not just keywords.
-- **🔍 Semantic Search:** Natural language processing allows users to search "ergonomic device for coding" and find keyboards/mice.
-- **⚡ Performance:** Asynchronous embedding generation using **Celery** and **Redis**.
-- **🐳 Dockerized:** Fully containerized setup for consistent development and production environments.
-- **☁️ Cloud Native:** Deployed on Railway with a microservices architecture (API + Worker + Redis + Postgres).
+1.  **Búsqueda Semántica:**
+    *   Endpoint: `/api/products/search/?q=algo para jugar`
+    *   Entiende el contexto. Buscar "algo para jugar" devolverá "Gaming Mouse" o "Mechanical Keyboard" aunque no contengan la palabra "jugar".
 
----
+2.  **Recomendaciones (Item-to-Item):**
+    *   Endpoint: `/api/products/{id}/recommendations/`
+    *   Calcula la distancia del coseno entre vectores para sugerir productos similares.
 
-## 🏗 Architecture
+3.  **Ingesta de Datos Inteligente:**
+    *   Script personalizado (`import_amazon_data`) que carga datos crudos y genera embeddings vectoriales al vuelo.
 
-The system is built as a set of microservices orchestrated via Docker Compose (Locally) and Railway (Production):
+## 🛠️ Instalación y Uso
 
-1.  **API Service (Django + Gunicorn):** Handles HTTP requests and business logic.
-2.  **Database (PostgreSQL + pgvector):** Stores product data and high-dimensional vectors (384d).
-3.  **Queue (Redis):** Manages background tasks.
-4.  **Worker (Celery):** Processes embedding generation asynchronously to keep the API fast.
+### Prerrequisitos
+*   Python 3.12+
+*   PostgreSQL con `pgvector` instalado.
+*   Redis (opcional, para Celery).
 
+### Pasos
 
-
----
-
-## 🛠 Tech Stack
-
-- **Backend:** Python 3.12, Django 5, Django REST Framework
-- **Database:** PostgreSQL 16 (using `ankane/pgvector` image)
-- **AI/ML:** sentence-transformers (`all-MiniLM-L6-v2`)
-- **Infrastructure:** Docker, Docker Compose, Gunicorn, Whitenoise
-- **CI/CD:** GitHub Actions
-
----
-
-## 📦 Local Installation (Docker)
-
-The easiest way to run the project is using Docker.
-
-1.  **Clone the repository**
+1.  **Clonar y configurar entorno:**
     ```bash
-    git clone [https://github.com/Jorgedosaa/product-recommender-api.git](https://github.com/Jorgedosaa/product-recommender-api.git)
+    git clone https://github.com/tu-usuario/product-recommender-api.git
     cd product-recommender-api
+    python -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
     ```
 
-2.  **Create .env file**
+2.  **Configurar Base de Datos:**
+    Asegúrate de tener una DB Postgres corriendo y configura las variables de entorno en un archivo `.env` o exportándolas:
     ```bash
-    cp .env.example .env
+    export DATABASE_URL=postgres://user:pass@localhost:5432/recommender
     ```
 
-3.  **Build and Run**
+3.  **Migraciones e Importación:**
     ```bash
-    docker-compose up --build
-    ```
-
-4.  **Access the API**
-    - Search: `http://localhost:8000/products/search/?q=headphones`
-    - Admin: `http://localhost:8000/admin/`
-
----
-
-## ☁️ Deployment (Railway)
-
-This project is deployed on **Railway**.
-
-### Key Configuration Steps:
-1.  **Database:** Must use the `ankane/pgvector` image instead of the standard Postgres image to support vector operations.
-2.  **Start Command:**
-    ```bash
-    gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
-    ```
-3.  **Data Seeding (ETL):**
-    Data was injected into the production database using a custom management command:
-    ```bash
+    python manage.py migrate
+    # Carga datos de prueba y genera vectores
     python manage.py import_amazon_data
     ```
 
----
+4.  **Ejecutar Servidor:**
+    ```bash
+    python manage.py runserver
+    ```
 
 ## 🧪 Testing
 
-Run the comprehensive test suite. Si corres las pruebas localmente fuera de Docker, asegúrate de tener Redis disponible o activar el modo síncrono de Celery:
-
+El proyecto cuenta con una suite de tests automatizados (CI/CD integrado).
 ```bash
-# Usando Docker 
-docker-compose exec api python manage.py test products
-
-# Localmente (Host)
-DB_HOST=localhost CELERY_TASK_ALWAYS_EAGER=True python manage.py test products
+python manage.py test products
+```
